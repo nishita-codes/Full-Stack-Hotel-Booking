@@ -36,16 +36,42 @@ export const createRoom = async (req , res) =>{
 
 // API TO GET ALL ROOMS
 export const getRooms = async (req , res) =>{
-
+ try{
+  const rooms = await Room.find({isAvailable : true}).populate({
+    path:'hotel', 
+    populate:{
+        path : 'owner',
+        select:'image'
+    }
+  }).sort({createdAt : -1})
+  res.json({success : true , rooms});
+ }catch(err){
+  res.json({success : false , message : err.message});
+ }
 }
 
 
 // API TO GET ALL ROOMS FOR A SPECIFIC HOTEL
 export const getOwnerRooms = async (req , res) =>{
-
+  try{
+   const hotelData = await Hotel({owner : req.auth.userId})
+   const rooms = await Room.find({hotel : hotelData._id.toString()}).populate("hotel");
+   res.json({success : true , rooms});
+  }catch(err){
+   res.json({success : false , message : err.message});
+  }
 }
 
 // API TO TOGGLE ROOM AVAILABILITY
 export const toggleRoomAvailability = async (req , res) =>{
+  try{
+    const {roomId} = req.body;
+    const roomData = await Room.findById(roomId);
 
+    roomData.isAvailable = !roomData.isAvailable;
+    await roomData.save();
+    res.json({success : true , message : "Room availability updated successfully"});
+  }catch(err){
+    res.json({success : false , message : err.message});
+  }
 }
