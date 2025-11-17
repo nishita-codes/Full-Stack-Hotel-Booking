@@ -1,4 +1,5 @@
 import Booking from "../models/Booking"
+import Hotel from "../models/Hotel";
 import Room from "../models/Room";
 
 // function to check Availablity of room 
@@ -70,4 +71,37 @@ export const createBooking = async(req , res) =>{
       res.json({success : false , message : "Failed to create booking"});
 
     }
+};
+
+// API TO GET ALL BOOKING FOR A USER
+// GET /api/booking/user
+
+export const getUserBooking = async(req , res) =>{
+    try {
+        const user = req.use._id;
+        const bookings = (await Booking.find({user}).populate("room hotel")).sort({createdAt : -1})
+        res.json({success :true , bookings});
+    } catch (err) {
+        res.json({success : false , message : "Failed to fetch bookings"});
+    }
+};
+
+// API TO GET ALL BOOKINGS FOR A HOTEL OWNER
+export const getOwnerBookings = async(req , res) =>{
+    try{
+    const hotel = await Hotel.fondOne({owner : req.auth.userId});
+    if(!hotel){
+        return res.json({success : false , message : "No Hotel Found"});
+
+    }
+    const bookings = await Booking.find({hotel : hotel._id}).populate("room hotel user").sort({createdAt : -1});
+    // TOTAL BOOKINGS
+    const totalBookings = bookings.length;
+    // TOTAL REVENEUE 
+    const totalRevenue = bookings.reduce((acc , booking) => acc + booking.totalPrice,0);
+
+    res.json({success : true , dashboardData : {totalBookings , totalRevenue , bookings}});
+} catch(err){
+    res.json({success :false , message : "fail to add bookings"});
+}
 }
