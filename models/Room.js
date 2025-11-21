@@ -11,7 +11,7 @@ const roomSchema = mongoose.Schema({
         type:Number , required : true
     },
     amenities:{
-        type: Array, required : true , ref : "user"
+        type: Array, required : true , ref : "User"
     },
     images: [{type:String }],
     isAvailable : { type :Boolean , default :true},

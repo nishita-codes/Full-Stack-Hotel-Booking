@@ -11,7 +11,7 @@ const hotelSchema = mongoose.Schema({
         type:String , required : true
     },
     owner:{
-        type:String , required : true , ref : "user"
+        type:String , required : true , ref : "User"
     },
     city:{
         type:String , required : true
